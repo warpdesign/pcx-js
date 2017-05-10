@@ -5,28 +5,12 @@ function Defer() {
     });
 }
 
-Number.prototype.toHex = function(tiny) {
-    var val = this.valueOf();
-    var str = '';
-
-    if (val == 0)
-        str = (tiny !== undefined) ? '00' : '0000';
-    else if (val > 255) {
-        var upper = (val >> 8).toString(16);
-        var lower = (val & 0x00FF).toString(16);
-        str = ((upper.length > 1) ? upper : ('0' + upper)) + ((lower.length > 1) ? lower : ('0' + lower));
-    } else {
-        str = val.toString(16);
-        if (val < 16)
-            str = '0' + str;
-    }
-
-    if (tiny === undefined && str.length < 4)
-        str = '00' + str;
-
-    return str.toUpperCase();
-}
-
+/**
+ * Simple object for loading and decoding PCX files
+ * 
+ * @param {File} file A reference to the file to load.
+ * 
+ */
 function PCX(file) {
     this.file = file;
     this.buffer = null;
@@ -46,6 +30,12 @@ function PCX(file) {
 }
 
 PCX.prototype = {
+    /**
+     * Loads the file into an `ArrayBuffer` so that it's
+     * ready to be decoded
+     * 
+     * @returns {Defer} A promise
+     */
     loadFile: function() {
         console.log('Loading file');
         var def = new Defer();
@@ -64,14 +54,32 @@ PCX.prototype = {
         return def.promise;
     },
 
+    /**
+     * Reads a little-endian word from the buffer
+     * 
+     * @param {Number} offset The offset. Doesn't need to be word-aligned.
+     * 
+     * @returns {Number} The word.
+     * 
+     * @private
+     */
     _readLEWord: function(offset) {
         return this.byteView[offset] | this.byteView[offset + 1] << 8;
     },
 
+    /**
+     * Returns true if the PCX 10 marker was found at offset 0.
+     * 
+     * @returns {Boolean}
+     */
     isPCXFile: function() {
         return this.byteView && this.byteView[0] === 10;
     },
 
+    /**
+     * Retrieves data from the PCX header and keep it in this.header.
+     * The width & height are also saved into this.width & this.height.
+     */
     readHeader: function() {
         console.log('Reading header');
         var def = new Defer();
@@ -105,16 +113,37 @@ PCX.prototype = {
         return def.promise;
     },
 
+    /**
+     * Returns true if the 2 most-significant bits are set
+     * 
+     * @param {Number} offset The byte offset to check.
+     * 
+     * @returns {Boolean} True if the 2 MSB are set
+     * 
+     * @private
+     */
     _isRLE: function(offset) {
         var rle = this.byteView[offset] >> 6;
 
         return rle === 3;
     },
 
+    /**
+     * Returns the length of the RLE run.
+     * 
+     * @param {Number} offset The byte to get the run length from.
+     * 
+     * @returns {Number} The run length (<= 63).
+     * 
+     * @private
+     */
     _lengthRLE: function(offset) {
         return this.byteView[offset] & 63;
     },
 
+    /**
+     * Decode RLE-Encoded PCX file
+     */
     decode: function() {
         console.log('Decoding PCX pixel data');
         // prepare pixel buffer
@@ -169,6 +198,11 @@ PCX.prototype = {
         }
     },
 
+    /**
+     * Converts already decoded PCX pixel data to Canvas RGBA format
+     * 
+     * @param {CanvasContext} ctx The context that will be used to render the pixels.
+     */
     toRGBA: function(ctx) {
         this.pixels = ctx.createImageData(this.width, this.height);
         console.log('Converting pixel format from RRRGGGBBB... to RGBARGBARGBA...');
@@ -187,6 +221,11 @@ PCX.prototype = {
         }
     },
 
+    /**
+     * Renders decoded and converted pixel data onto the specified canvas context.
+     * 
+     * @param {CanvasContext} ctx The context to render the pixels on.
+     */
     render: function(ctx) {
         console.log('Drawing pixel data');
 
