@@ -4,7 +4,7 @@ This is just a little attempt at writing a very simple [PCX](https://en.wikipedi
 
 This loader only supports 24bit (3 planes) PCX files.
 
-See it in action: 
+See it in action: [demo](https://warpdesign.github.io/pcx-js/)
 
 ## How to use it?
 
