@@ -39,7 +39,7 @@ The header is 128 bytes long and can contain an optional 16 colors palette:
 
 The width and height of the image is given by `Xmax - Xmin + 1` and the size of a scanline is give by `width * bytesPerRow`.
 
-* Note * Since bytesPerRow is even, there may be an optional marker at the end of each plane.
+*Note* Since `bytesPerRow` is always even, there may be an optional marker at the end of each plane.
 
 ## PCX RLE encoding
 
@@ -54,12 +54,18 @@ Let's imagine a picture with the following colors:
 The encoded RLE data would look like this:
 
 ```
-0x5 0xc4 0x10 ...
+0x5 0xC4 0x10 ...
 ```
 
-The first pixel is not repeated so appears decoded, for the next one, we generate the run length using 0xc0 | 0x4 and then append the pixel value 0x10.
+The first pixel is not repeated so appears decoded. For the next one, we have to repeat it 4 times. To do so, we have to create a new byte with the PCX marker `0xC0` (2 most significant bits are set to 1: `1100000000` in binary) and mask it with the repeat count:
 
-## PCX 24 pixel format vs HTML Canvas
+```
+0xC0 | 0x4 == 0xC4
+```
+
+The next byte is then pixel value that we want to repeat: `0x10`.
+
+## PCX 24bit pixel format vs HTML Canvas
 
 Each PCX scanline is divided into RGB `planes` (there may be an optional third play for luminance or alpha but this is not supported). For example, a 4x4 24bit file would look like this:
 
