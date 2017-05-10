@@ -69,7 +69,7 @@ The next byte is then pixel value that we want to repeat: `0x10`.
 
 ## PCX 24bit pixel format vs HTML Canvas
 
-Each PCX scanline is divided into RGB `planes` (there may be an optional third play for luminance or alpha but this is not supported). For example, a 4x4 24bit file would look like this:
+Each PCX scanline is divided into RGB `planes` (there may be an optional third plane for luminance or alpha but this is not supported). For example, a 4x4 pixels 24bit file would look like this:
 
 ```
 row 1
