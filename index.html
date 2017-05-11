@@ -35,8 +35,8 @@
                     pcx.loadFile()
                     .then(() => {
                         pcx.readHeader();
-                        pcx.decode();
-                        pcx.toRGBA(context);
+                        pcx.decode(context);
+                        // pcx.toRGBA(context);
                         pcx.render(context);
 
                     })

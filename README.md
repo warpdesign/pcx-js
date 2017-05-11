@@ -106,16 +106,13 @@ row 4
 RGBA RGBA RGBA RGBA
 ```
 
-It may be possible to decoded RLE pixel data and convert it to RGBA pixel format in a single pass, but it's done in two pass for now:
-
- - PCX.decode first decodes RLE pixel data into `RRRGGGBBB` format
- - PCX.toRGBA then converts PCX pixel data into Canvas `RGBA` format
+ - PCX.decode both decodes RLE pixel data and convert it into HTML Canvas RGBA format.
 
  ## Rendering using Canvas
 
- Rendering pixel data using the Canvas object is quite simple using the `ImageData` object return by `CanvasContext.createImageData`.
+ Drawing pixel onto the screen is as simple as calling `CanvasContext.putImageData` and feeding it with an array of RGBA data.
 
- After having filling in each pixel RGBA's data, drawing pixel onto the screen is as simple as calling `CanvasContext.putImageData`.
+ `CanvasContext.createImageData` takes care of allocating the memory for writing pixel data.
 
  ## Working on binary data using JavaScript
 

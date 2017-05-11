@@ -143,33 +143,30 @@ PCX.prototype = {
     },
 
     /**
-     * Decode RLE-Encoded PCX file
+     * Decode RLE-Encoded PCX file into HTML Canvas format
      */
-    decode: function() {
+    decode: function(ctx) {
         console.log('Decoding PCX pixel data');
         // prepare pixel buffer
-        this.pcx_pixels = new Uint8Array(new ArrayBuffer(this.width * this.height * this.planes));
+        // this.pcx_pixels = new Uint8Array(new ArrayBuffer(this.width * this.height * 4));
+        this.pixels = ctx.createImageData(this.width, this.height);
 
         // PCX header is 128 bytes long
         var offset = 128,
-            complete = false,
-            plane = 0,
+            p = 0,
             pos = 0,
-            row = 0,
-            col = 0,
-            length = 0,
-            isRLE = false,
-            str = '';
+            length = 0;
 
         /**
          * Simple RLE decoding: if 2 msb == 1 then we have to mask out count
          * and repeat following byte count times
          */
         for (var y = 0; y < this.height; y++ ){
-            for (var p = 0; p < this.planes; p++) {
+            for (p = 0; p < this.planes; p++) {
                 /* bpr holds the number of bytes needed to decode a row of plane:
                    we keep on decoding until the buffer is full
                 */
+                pos = 4 * this.width * y + p;
                 for (var byte = 0; byte < this.header.bpr; byte++) {
                     if (length === 0) {
                         if (this._isRLE(offset)) {
@@ -187,30 +184,12 @@ PCX.prototype = {
                        scanline, we simply check we're not out of bounds
                     */
                     if (byte < this.width) {
-                        this.pcx_pixels[pos++] = val;
-                    }
-                }
-            }
-        }
-    },
-
-    /**
-     * Converts already decoded PCX pixel data to Canvas RGBA format
-     * 
-     * @param {CanvasContext} ctx The context that will be used to render the pixels.
-     */
-    toRGBA: function(ctx) {
-        this.pixels = ctx.createImageData(this.width, this.height);
-        console.log('Converting pixel format from RRRGGGBBB... to RGBARGBARGBA...');
-
-        // convert PCX RRRGGGBBB to Canvas RGBARGBARGBA
-        for (row = 0; row < this.height; row++) {
-            for (plane = 0; plane < this.planes; plane++) {
-                for (col = 0; col < this.width; col++) {
-                    this.pixels.data[(row * this.width * 4) + (col * 4) + plane] = this.pcx_pixels[(row * this.width * this.planes) + col + (plane * this.width)];
-                    // alpha data after each plane
-                    if (plane === this.planes - 1) {
-                        this.pixels.data[(row * this.width * 4) + (col * 4) + plane + 1] = 255;
+                        this.pixels.data[pos] = val;
+                        // add alpha channel
+                        if (p === 2) {
+                            this.pixels.data[pos + 1] = 255;
+                        }
+                        pos += 4;
                     }
                 }
             }
