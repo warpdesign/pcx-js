@@ -89,6 +89,7 @@ PCX.prototype = {
         } else {
             this.header = Object.assign(this.header, {
                 version: this.byteView[1],
+                encoding: this.byteView[2],                
                 bpp: this.byteView[3],
                 xmin: this._readLEWord(4),
                 ymin: this._readLEWord(6),
@@ -164,36 +165,31 @@ PCX.prototype = {
          * Simple RLE decoding: if 2 msb == 1 then we have to mask out count
          * and repeat following byte count times
          */
-        while (row < this.height) {
-            isRLE = this._isRLE(offset);
-
-            if (!isRLE) {
-                length = 1;
-                val = this.byteView[offset];
-            } else {
-                length = this._lengthRLE(offset);
-                val = this.byteView[offset+1];             
-            }
-            i = 0;
-            while (i < length) {
-                this.pcx_pixels[pos++] = val;
-                col++;
-                if (col >= this.width) {
-                    plane++;
-                    offset += this.header.bpr - col;
-                    if (plane > this.planes - 1) {
-                        plane = 0;
-                        i = length;
-                        row++;
+        for (var y = 0; y < this.height; y++ ){
+            for (var p = 0; p < this.planes; p++) {
+                /* bpr holds the number of bytes needed to decode a row of plane:
+                   we keep on decoding until the buffer is full
+                */
+                for (var byte = 0; byte < this.header.bpr; byte++) {
+                    if (length === 0) {
+                        if (this._isRLE(offset)) {
+                            length = this._lengthRLE(offset);
+                            val = this.byteView[offset + 1];
+                            offset += 2
+                        } else {
+                            length = 1;
+                            val = this.byteView[offset++];
+                        }
                     }
-                    col = 0;
+                    length--;
+
+                    /* Since there may, or may not be blank data at the end of each
+                       scanline, we simply check we're not out of bounds
+                    */
+                    if (byte < this.width) {
+                        this.pcx_pixels[pos++] = val;
+                    }
                 }
-                i++;
-            }
-            if (isRLE) {
-                offset += 2;
-            } else {
-                offset++;
             }
         }
     },
