@@ -143,9 +143,47 @@ PCX.prototype = {
     },
 
     /**
+     * Get 256 colors palette
+     */
+    getPalette: function() {
+        // check that we have a 256 colors palette at the end of the file
+        if (this.byteView[this.buffer.byteLength - 769] === 12) {
+            this.palette256 = new Uint8Array(this.buffer, this.buffer.byteLength - 768);
+        } else {
+            throw 'Could not find 256 color palette.';
+        }
+    },
+
+    /**
+     * Set color using palette index
+     * 
+     * @param {Number} pos Pixel position to set.
+     * @param {Number} index Palette index to get the color from.
+     */
+    setColorFromPalette: function(pos, index) {
+        const palette256 = this.palette256,
+              pixels = this.pixels.data,
+              start = index * 3;
+
+        pixels[pos] = palette256[start];
+        pixels[pos + 1] = palette256[start + 1];
+        pixels[pos + 2] = palette256[start + 2];
+        // alpha channel
+        pixels[pos + 3] = 255;
+    },
+
+    /**
      * Decode RLE-Encoded PCX file into HTML Canvas format
      */
     decode: function(ctx) {
+        if (this.header.bpp !== 8 || (this.planes !== 3 && this.planes !== 1)) {
+            throw `Error: format not supported: bpp=${this.header.bpp} bitplanes=${this.header.bitplanes}`;
+        }
+
+        if (this.planes === 1) {
+            this.getPalette();
+        }
+
         console.log('Decoding PCX pixel data');
         // prepare pixel buffer
         // this.pcx_pixels = new Uint8Array(new ArrayBuffer(this.width * this.height * 4));
@@ -184,11 +222,16 @@ PCX.prototype = {
                        scanline, we simply check we're not out of bounds
                     */
                     if (byte < this.width) {
-                        this.pixels.data[pos] = val;
-                        // add alpha channel
-                        if (p === 2) {
-                            this.pixels.data[pos + 1] = 255;
+                        if (this.planes === 3) {
+                            this.pixels.data[pos] = val;
+                            // add alpha channel
+                            if (p === this.planes - 1) {
+                                this.pixels.data[pos + 1] = 255;
+                            }
+                        } else {
+                            this.setColorFromPalette(pos, val);
                         }
+     
                         pos += 4;
                     }
                 }

@@ -2,7 +2,9 @@
 
 This is just a little attempt at writing a very simple [PCX](https://en.wikipedia.org/wiki/PCX) decoder for JavaScript.
 
-This loader only supports 24bit (3 planes) PCX files.
+This loader only supports the following PCX variants:
+ - 24 bit (3 planes)
+ - 8bit (1 plane)
 
 ## Demo
 
@@ -107,6 +109,13 @@ RGBA RGBA RGBA RGBA
 ```
 
  - PCX.decode both decodes RLE pixel data and convert it into HTML Canvas RGBA format.
+
+ ## 256 Colors palette
+ PCX supports 256 colors palette mode. In this mode, the palette is stored, uncompressed, at the end of the file, just after a `12` marker.
+
+ Each palette entry is a 3 byte triple with each component ranging from 0 to 255 so no conversion is needed for HTML 5 Canvas.
+
+ Total palette size is 3 * 256 = 768 bytes.
 
  ## Rendering using Canvas
 
