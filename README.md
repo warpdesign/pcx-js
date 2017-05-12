@@ -2,9 +2,10 @@
 
 This is just a little attempt at writing a very simple [PCX](https://en.wikipedia.org/wiki/PCX) decoder for JavaScript.
 
-This loader only supports the following PCX variants:
+This loader supports the following PCX variants:
  - 24 bit (3 planes)
- - 8bit (1 plane)
+ - 8 bit (1 plane)
+ - 4 bit (4 planes)
 
 ## Demo
 

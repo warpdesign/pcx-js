@@ -197,17 +197,24 @@ PCX.prototype = {
 
         this.getPalette();
 
+        // temp buffer that will hold 
+        this.temp = new Uint8Array(new ArrayBuffer(this.width * this.height));
+        this.pixels = ctx.createImageData(this.width, this.height);
+
+        for (p = 0; p < this.temp.byteLength; p++) {
+            this.temp[p] = 0;
+        }
+
         /**
          * Simple RLE decoding: if 2 msb == 1 then we have to mask out count
          * and repeat following byte count times
          */
-        debugger;
         for (var y = 0; y < this.height; y++ ){
             for (p = 0; p < this.planes; p++) {
                 /* bpr holds the number of bytes needed to decode a row of plane:
                    we keep on decoding until the buffer is full
                 */
-                pos = 4 * this.width * y + p;
+                pos = this.width * y;
                 for (var byte = 0; byte < this.header.bpr; byte++) {
                     if (length === 0) {
                         if (this._isRLE(offset)) {
@@ -224,10 +231,19 @@ PCX.prototype = {
                     /* Since there may, or may not be blank data at the end of each
                        scanline, we simply check we're not out of bounds
                     */
-                    if (byte < this.width) {
-                        this.setColorFromPalette(pos, val);
+                    if ((byte*8) < this.width) {
+                        // this.setColorFromPalette(pos, val);
+                        for (i = 0; i < 8; i++) {
+                            var bit = ((val >> (7-i)) & 1);
+                            this.temp[pos + i] |= bit << p;
+
+                            // we have all planes: we may set color using the palette
+                            if (p === this.planes - 1) {
+                                this.setColorFromPalette((pos + i) * 4, this.temp[pos + i]);
+                            }
+                        }
      
-                        pos += 4;
+                        pos += 8;
                     }
                 }
             }
