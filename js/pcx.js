@@ -147,8 +147,10 @@ PCX.prototype = {
      */
     getPalette: function() {
         // check that we have a 256 colors palette at the end of the file
-        if (this.byteView[this.buffer.byteLength - 769] === 12) {
-            this.palette256 = new Uint8Array(this.buffer, this.buffer.byteLength - 768);
+        if (this.header.bpp === 8 && this.byteView[this.buffer.byteLength - 769] === 12) {
+            this.palette = new Uint8Array(this.buffer, this.buffer.byteLength - 768);
+        } else if (this.header.bpp === 1) {
+            this.palette = this.header.palette;
         } else {
             throw 'Could not find 256 color palette.';
         }
@@ -161,25 +163,81 @@ PCX.prototype = {
      * @param {Number} index Palette index to get the color from.
      */
     setColorFromPalette: function(pos, index) {
-        const palette256 = this.palette256,
+        const palette = this.palette,
               pixels = this.pixels.data,
               start = index * 3;
 
-        pixels[pos] = palette256[start];
-        pixels[pos + 1] = palette256[start + 1];
-        pixels[pos + 2] = palette256[start + 2];
+        pixels[pos] = palette[start];
+        pixels[pos + 1] = palette[start + 1];
+        pixels[pos + 2] = palette[start + 2];
         // alpha channel
         pixels[pos + 3] = 255;
+    },
+
+    decode: function(ctx) {
+        switch(this.header.bpp) {
+            case 8:
+                this.decode8bpp(ctx);
+                break;
+
+            case 1:
+                this.decode4bpp(ctx);
+                break;
+
+            default:
+                throw `Unsupported bpp: ${this.header.bpp}`;
+        }
+    },
+
+    decode4bpp: function(ctx) {
+        var offset = 128,
+            p = 0,
+            pos = 0,
+            length = 0;
+
+        this.getPalette();
+
+        /**
+         * Simple RLE decoding: if 2 msb == 1 then we have to mask out count
+         * and repeat following byte count times
+         */
+        debugger;
+        for (var y = 0; y < this.height; y++ ){
+            for (p = 0; p < this.planes; p++) {
+                /* bpr holds the number of bytes needed to decode a row of plane:
+                   we keep on decoding until the buffer is full
+                */
+                pos = 4 * this.width * y + p;
+                for (var byte = 0; byte < this.header.bpr; byte++) {
+                    if (length === 0) {
+                        if (this._isRLE(offset)) {
+                            length = this._lengthRLE(offset);
+                            val = this.byteView[offset + 1];
+                            offset += 2
+                        } else {
+                            length = 1;
+                            val = this.byteView[offset++];
+                        }
+                    }
+                    length--;
+
+                    /* Since there may, or may not be blank data at the end of each
+                       scanline, we simply check we're not out of bounds
+                    */
+                    if (byte < this.width) {
+                        this.setColorFromPalette(pos, val);
+     
+                        pos += 4;
+                    }
+                }
+            }
+        }
     },
 
     /**
      * Decode RLE-Encoded PCX file into HTML Canvas format
      */
-    decode: function(ctx) {
-        if (this.header.bpp !== 8 || (this.planes !== 3 && this.planes !== 1)) {
-            throw `Error: format not supported: bpp=${this.header.bpp} bitplanes=${this.header.bitplanes}`;
-        }
-
+    decode8bpp: function(ctx) {
         if (this.planes === 1) {
             this.getPalette();
         }
