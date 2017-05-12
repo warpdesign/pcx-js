@@ -155,4 +155,4 @@ reader.readAsArrayBuffer(file);
 
 ## What's missing
 
-This was a simple experiment and does not support any paletted PCX files nor files using a transparency channel.
+PCX-js loader does not support 1/2 bit files or files with an alpha channel.
