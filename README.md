@@ -1,8 +1,8 @@
-# pcx-js - loading and decoding pcx files using JavaScript
+# A JavaScript PCX decoder for NodeJS & Browser
 
-This is just a little attempt at writing a very simple [PCX](https://en.wikipedia.org/wiki/PCX) decoder for JavaScript.
+pcx-js is a simple [PCX](https://en.wikipedia.org/wiki/PCX) decoder for JavaScript which works both in NodeJS & in the Browser.
 
-This loader supports the following PCX variants:
+The decoder supports the following PCX variants:
  - 24 bit (3 planes)
  - 8 bit (1 plane)
  - 4 bit (4 planes)
@@ -11,12 +11,35 @@ This loader supports the following PCX variants:
 
 Head over to [https://warpdesign.github.io/pcx-js/](https://warpdesign.github.io/pcx-js/) for a demo.
 
-## How to use it?
+## Installation
 
-Simply open the html file and drop a local PCX file onto the drop zone and it
-will be decoded:
+**NodeJS**
+```
+npm install pcx-js
+```
 
-![page1](./img/inaction.png)
+**Browser**
+```
+<script type="text/javascript" src="pcx.js"></script>
+```
+
+## Usage
+
+**NodeJS**
+```
+let pcx = require('pcx-js),
+    fs = require('fs');
+
+let buffer = fs.readFileSync('./img/16col.pcx'),
+    myPcx = new pcx(buffer),
+    data = myPcx.decode();
+```
+
+**Browser**
+```
+    var pcx = new PCX(buffer),
+        pcxData = pcx.decode(context);
+```
 
 ## PCX file format
 
@@ -124,7 +147,7 @@ RGBA RGBA RGBA RGBA
 
  `CanvasContext.createImageData` takes care of allocating the memory for writing pixel data.
 
- ## Working on binary data using JavaScript
+ ## Working on binary data using JavaScript in the Browser
 
  Since a few years, JavaScript provides an easy way to work with binary Data using the `ArrayBuffer` and `TypedArray` objects.
 
