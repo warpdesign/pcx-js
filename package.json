@@ -1,0 +1,31 @@
+{
+  "name": "pcx-js",
+  "version": "1.0.0",
+  "description": "A JavaScript PCX decoder for NodeJS & Browser",
+  "main": "js/pcx.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/warpdesign/pcx-js.git"
+  },
+  "keywords": [
+    "pcx",
+    "4bit",
+    "8bit",
+    "24bit",
+    "decoder",
+    "image",
+    "pixel"
+  ],
+  "author": {
+    "name": "Nicolas Ramz",
+    "email": "nicolas.ramz@gmail.com"
+  },
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/warpdesign/pcx-js/issues"
+  },
+  "homepage": "https://github.com/warpdesign/pcx-js#readme"
+}
