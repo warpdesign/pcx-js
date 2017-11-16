@@ -160,7 +160,7 @@ reader.onload = (e) => {
     // An array buffer is a simple binary buffer
     let buffer = e.target.result;
     
-    // To access it we simple create a TypedArray view
+    // To access it we simply create a TypedArray view
     let byteView = new Uint8Array(e.target.result);
     
     // now we may read/write on the buffer using the typedArray:
