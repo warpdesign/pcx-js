@@ -127,6 +127,11 @@
 
         /**
          * Sets the palette either from the header (< 8 bit) or at the bottom of the file (8bit)
+         * 
+         * Note: in Node.js, this.palette is a copy of the palette data from the buffer
+         * so modifying the palette won't impact the main buffer.
+         * 
+         * When ran in the browser, palette buffer is shared with the main buffer.
          */
         getPalette: function() {
             // check that we have a 256 colors palette at the end of the file

@@ -27,7 +27,7 @@ npm install pcx-js
 
 **NodeJS**
 ```
-let pcx = require('pcx-js),
+let pcx = require('pcx-js'),
     fs = require('fs');
 
 let buffer = fs.readFileSync('./img/16col.pcx'),
