@@ -131,7 +131,7 @@
         getPalette: function() {
             // check that we have a 256 colors palette at the end of the file
             if (this.header.bpp === 8 && this.byteView[this.buffer.byteLength - 769] === 12) {
-                this.palette = new Uint8Array(this.buffer, this.buffer.byteLength - 768);
+                this.palette = new Uint8Array(this.buffer.slice(this.buffer.byteLength - 768));
             } else if (this.header.bpp === 1) {
                 this.palette = this.header.palette;
             } else {
