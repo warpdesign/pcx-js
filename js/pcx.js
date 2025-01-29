@@ -66,7 +66,6 @@
          * The width & height are also saved into this.width & this.height.
          */
         readHeader: function() {
-            console.log('Reading header');
             var def = new Defer();
 
             if (!this.isPCXFile()) {
