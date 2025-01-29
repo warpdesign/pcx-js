@@ -20,7 +20,6 @@
             });
 
             dropZone.addEventListener('drop', (e) => {
-                console.log('Dropped file');
                 e.stopPropagation();
                 e.preventDefault();
 
@@ -48,7 +47,6 @@
          * @param {CanvasContext} ctx The context to render the pixels on.
          */
         render: function(ctx, pcxData) {
-            console.log('Drawing pixel data');
             const width = pcxData.width,
                   height = pcxData.height;
 
@@ -68,13 +66,11 @@
          * @returns {Defer} A promise
          */
         loadFile: function(file) {
-            console.log('Loading file');
             var def = new Defer();
 
             var reader = new FileReader();
             
             reader.onload = (e) => {
-                console.log(`File loaded, length = ${e.target.result.byteLength} bytes`);
                 this.buffer = e.target.result;
                 this.byteView = new Uint8Array(e.target.result);
                 def.resolve(this.buffer);
